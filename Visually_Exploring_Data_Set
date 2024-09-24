@@ -1,0 +1,127 @@
+import statistics
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+
+df = pd.read_csv('Life Expectancy Data.csv')
+print(df.columns)
+
+columns_to_check = ["Life expectancy ", "Alcohol", "percentage expenditure",
+                    " BMI ", "GDP", "Population",
+                    "Income composition of resources", "Schooling"]
+df = df.dropna()
+df.isna().sum()
+
+means = {}
+for column in columns_to_check:
+    means[column] = round(statistics.mean(df[column]), 2)
+for column, mean_value in means.items():
+    print(f"Mean of {column}: {mean_value}")
+
+medians = {}
+for column in columns_to_check:
+    medians[column] = round(statistics.median(df[column]), 2)
+for column, median_value in means.items():
+    print(f"Median of {column}: {median_value}")
+
+modes = {}
+for column in columns_to_check:
+    modes[column] = round(statistics.mode(df[column]), 2)
+for column, mode_value in modes.items():
+    print(f"Mode of {column}: {mode_value}")
+
+variances = {}
+for column in columns_to_check:
+    variances[column] = round(statistics.variance(df[column]), 2)
+for column, variance_value in variances.items():
+    print(f"Variance of {column}: {variance_value}")
+
+stdevs = {}
+for column in columns_to_check:
+    stdevs[column] = round(statistics.stdev(df[column]), 2)
+for column, stdev_value in stdevs.items():
+    print(f"Standard deviation of {column}: {stdev_value}")
+
+df8 = pd.DataFrame({'means':pd.Series(means),
+                    'medians':pd.Series(medians),
+                    'modes':pd.Series(modes),
+                    'variances':pd.Series(variances),
+                    'stdevs':pd.Series(stdevs),
+                   })
+display(df8)
+
+## histograms ##
+fig, axes = plt.subplots(2, 4, figsize=(20, 10))  # 2 rows, 4 columns
+axes = axes.flatten()  # Flatten the 2D array of axes to 1D
+
+for i, column in enumerate(columns_to_check):
+    sns.histplot(df[column], bins=40, ax=axes[i])
+    axes[i].set_title(f'Histogram of {column}')
+plt.savefig("1_histograms", dpi=300)
+plt.tight_layout()
+plt.show()
+
+## heatmap ##
+plt.figure() # create figure
+sns.set_theme(style="whitegrid")
+df1 = df[columns_to_check]
+plt.figure(figsize=(8, 3))
+heatmap = sns.heatmap(df1.corr(), annot=True)
+heatmap.set_xticklabels(heatmap.get_xticklabels(), rotation=45, ha='right')
+plt.tight_layout()
+plt.subplots_adjust(bottom=0.2)
+plt.savefig("3_Heat_Map.png", dpi=300)
+plt.show() 
+
+## scatterplots ##
+sns.set_theme(style="whitegrid")
+
+fig, axes = plt.subplots(2, 4, figsize=(20, 10))  # 2 rows, 4 columns
+axes = axes.flatten()  # Flatten the 2D array of axes to 1D
+
+for i, column in enumerate(columns_to_check):
+    sns.scatterplot(data=df, x="Life expectancy ", y= df[column], ax=axes[i])
+    axes[i].set_title(f'Histogram of {column}')
+    
+plt.savefig("2_scatterplots", dpi=300)
+plt.tight_layout()
+plt.show()
+
+## correlations_grouped ##
+sns.set_theme(style="whitegrid")
+
+fig, axes = plt.subplots(2, 4, figsize=(20, 10))  
+axes = axes.flatten()  # Flatten the 2D array of axes to 1D
+
+for i, column in enumerate(columns_to_check):
+    sns.scatterplot(data=df, x="Life expectancy ", y= df[column], ax=axes[i], hue="Status",)
+    #axes[i].set_title(f'Histogram of {column}')
+
+plt.tight_layout()
+plt.savefig("4_correlations_hue.png", dpi=300)
+plt.show()
+
+## # violin plot with strip chart ##
+
+sns.set_theme(style="whitegrid")
+fig, axes = plt.subplots(2, 4, figsize=(20, 10))  
+axes = axes.flatten() 
+
+for i, column in enumerate(columns_to_check):
+    sns.violinplot(
+        x="Status", y= df[column], data=df,
+        inner=None, saturation=0.1, 
+        #hue="Status", 
+        ax=axes[i]
+    )
+    sns.stripplot(
+        x="Status", y= df[column], data=df,
+        size=3, 
+        ax=axes[i]
+    )
+
+plt.tight_layout()
+plt.savefig("5_Violin_Swarm.png", dpi=300)
+plt.show()
+
